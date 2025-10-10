@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: sat-courses
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Add yarn globally
+        run: npm install --global yarn
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build and Test
+        run: |
+          echo "Running production build"
+          yarn build:shared
+          yarn build:admin
+          yarn build:user
+
+      - name: Deploy
+        run: |
+          cp -a ~/sat-course/_work/satashkent-courses/satashkent-courses/. /home/sat-courses/
+          cd /home/sat-courses/
+          sudo docker-compose down
+          sudo docker-compose up -d
